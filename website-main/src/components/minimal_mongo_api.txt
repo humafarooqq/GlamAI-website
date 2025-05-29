@@ -1,0 +1,191 @@
+# Minimal MongoDB Read-Only API Setup
+
+This guide provides the minimal code and explanations needed to set up a Node.js/Express API that can **read** (but not add/edit/delete) data from a MongoDB database. This is useful for a frontend or another service that only needs to fetch data.
+
+---
+
+## 1. Dependencies (package.json)everything
+
+```
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "cors": "^2.8.5"
+  }
+}
+```
+
+- **express**: Web server framework
+- **mongoose**: MongoDB object modeling
+- **dotenv**: Loads environment variables from `.env`
+- **cors**: Allows cross-origin requests (for frontend access)
+
+---
+
+## 2. .env File (not code, but required)
+
+```
+MONGODB_URI=your_mongodb_connection_string
+PORT=5000
+```
+
+- Replace `your_mongodb_connection_string` with your actual MongoDB URI.
+
+---
+
+## 3. Database Connection (db.js)
+
+```
+// db.js
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+dotenv.config();
+
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => {
+  console.log('Connected to MongoDB');
+});
+
+module.exports = db;
+```
+
+---
+
+## 4. Product Model (models/Product.js)
+
+```
+const mongoose = require('mongoose');
+
+const shadeSchema = new mongoose.Schema({
+  name: String,
+  colorCode: String,
+  referenceImage: String, // Just a URL or path if you only need to read
+  price: Number,
+  stock: Number
+});
+
+const productSchema = new mongoose.Schema({
+  name: String,
+  category: String,
+  brand: String,
+  description: String,
+  mainImage: String, // Just a URL or path if you only need to read
+  shades: [shadeSchema],
+  features: [String],
+  ingredients: [String],
+  createdAt: Date,
+  updatedAt: Date
+});
+
+module.exports = mongoose.model('Product', productSchema);
+```
+
+---
+
+## 5. Products Route (routes/products.js)
+
+```
+const express = require('express');
+const router = express.Router();
+const Product = require('../models/Product');
+
+// Get all products
+router.get('/', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get single product by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+module.exports = router;
+```
+
+---
+
+## 6. Main Server File (server.js)
+
+```
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+const db = require('./db');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use('/api/products', require('./routes/products'));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+```
+
+---
+
+## 7. Folder Structure
+
+```
+project-root/
+├── db.js
+├── models/
+│   └── Product.js
+├── routes/
+│   └── products.js
+├── server.js
+├── package.json
+├── .env
+```
+
+---
+
+## 8. How it works
+- The server connects to MongoDB using Mongoose.
+- The Product model defines the structure of your product documents.
+- The `/api/products` endpoint returns all products.
+- The `/api/products/:id` endpoint returns a single product by its MongoDB ID.
+- No POST/PUT/DELETE endpoints are provided, so this API is **read-only**.
+- You can add more GET endpoints as needed for categories, brands, etc.
+
+---
+
+## 9. How to use in a new project
+1. Copy the code above into the respective files in your new project.
+2. Run `npm install` to install dependencies.
+3. Add your MongoDB URI to the `.env` file.
+4. Start the server with `node server.js` or `npm start`.
+5. Your frontend or other service can now fetch data from `/api/products`.
+
+---
+
+## 10. Security Note
+- This setup is for **public read-only** APIs. If you need authentication or want to restrict access, add middleware accordingly.
+
+---
+
+## 11. Extending
+- To add more models (e.g., users, orders), repeat the model and route pattern above.
+- To add filtering, sorting, or pagination, modify the GET endpoints in `routes/products.js`. 

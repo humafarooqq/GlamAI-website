@@ -1,0 +1,63 @@
+/* Custom Slider Thumbs */
+.slider-thumb-pink::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ec4899; /* pink-500 */
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  margin-top: -7px; /* Adjust to center thumb */
+}
+
+.slider-thumb-pink::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #ec4899;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+.slider-thumb-neutral::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #a1a1aa; /* neutral-400 */
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-top: -6px; /* Adjust to center thumb */
+}
+
+.slider-thumb-neutral::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #a1a1aa;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* Dark mode specific slider thumbs if needed */
+.dark .slider-thumb-pink::-webkit-slider-thumb {
+  border-color: #1f2937; /* dark:bg-neutral-800 or similar */
+}
+
+.dark .slider-thumb-pink::-moz-range-thumb {
+  border-color: #1f2937;
+}
+
+.dark .slider-thumb-neutral::-webkit-slider-thumb {
+  border-color: #1f2937;
+}
+
+.dark .slider-thumb-neutral::-moz-range-thumb {
+  border-color: #1f2937;
+}
+
+/* Ensure your html tag has the 'dark' class when dark mode is active for the above to work */ 
